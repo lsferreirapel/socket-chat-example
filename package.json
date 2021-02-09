@@ -1,0 +1,10 @@
+{
+  "name": "socket-chat-example",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Lucas Ferreira <lsferreirapel@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "gitmoji-cli": "^3.2.18"
+  }
+}
