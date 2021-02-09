@@ -5,6 +5,8 @@
   "author": "Lucas Ferreira <lsferreirapel@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "gitmoji-cli": "^3.2.18"
+    "express": "^4.17.1",
+    "gitmoji-cli": "^3.2.18",
+    "socket.io": "^3.1.1"
   }
 }
