@@ -45,11 +45,18 @@
     // });
 
     socket.on('chat message', msg => {
-      const item = document.createElement('li');
+      let item = document.createElement('li');
       item.textContent = msg;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     });
+
+    socket.on('user connection', alert => {
+      let item = document.createElement('li');
+      item.textContent = alert;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    })
 
   </script>
   </body>
