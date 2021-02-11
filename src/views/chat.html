@@ -22,7 +22,11 @@
     </form>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    var socket = io();
+    const socket = io({
+      auth: {
+        token: document.cookie?.split('; ')[0]?.slice(6)
+      }
+    });
 
     const messages = document.getElementById('messages');
     const form = document.getElementById('form');
