@@ -18,45 +18,85 @@
   <body>
     <ul id="messages"></ul>
     <form id="form" action="">
+      <span id="typing-info"></span>
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    var socket = io();
+    const socket = io({
+      auth: {
+        token: document.cookie?.split('; ')[0]?.slice(6)
+      }
+    });
 
+    const span = document.getElementById('typing-info');
     const messages = document.getElementById('messages');
     const form = document.getElementById('form');
     const input = document.getElementById('input');
+    let user;
+
+    socket.on('user information', userInfo => {
+      user = userInfo;
+    }) 
+
+    socket.on('user connection', (alert, color) => {
+      let item = document.createElement('li');
+      item.textContent = alert;
+      item.style.color = color;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    })
+
+    socket.on('typing', (bool, user) => {
+      if (bool) {
+
+        span.textContent = `${user.username} is typing...`;
+      } else {
+        span.textContent = '';
+      }
+    })
+
+
+    socket.on('chat message', (msg, user) => {
+      let item = document.createElement('li');
+      item.textContent = `${user.username}: ${msg}`;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+
+
+    let typeInterval;
+    let typing = false;
+    input.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') {
+        clearInterval(typeInterval);
+        if (!typing) {
+          typing = true;
+          socket.emit('typing', typing);
+        } 
+        typeInterval = setTimeout(() => {
+          typing = false;
+          socket.emit('typing', typing);
+        }, 2000);
+      }
+    });
 
     form.addEventListener('submit', e => { 
       e.preventDefault();
+      
+      if (typing) {
+        clearInterval(typeInterval);
+        typing = false;
+        socket.emit('typing', typing);
+      }
+
       if (input.value) {
         socket.emit('chat message', input.value);
         input.value = '';
       }
     });
 
-    // form.onsubmit(e => {
-    //   e.preventDefault();
-    //   if (input.value) {
-    //     socket.emit('chat message', input.value);
-    //     input.value = '';
-    //   }
-    // });
-
-    socket.on('chat message', msg => {
-      let item = document.createElement('li');
-      item.textContent = msg;
-      messages.appendChild(item);
-      window.scrollTo(0, document.body.scrollHeight);
-    });
-
-    socket.on('user connection', alert => {
-      let item = document.createElement('li');
-      item.textContent = alert;
-      messages.appendChild(item);
-      window.scrollTo(0, document.body.scrollHeight);
-    })
+    
 
   </script>
   </body>

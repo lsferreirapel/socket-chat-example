@@ -1,70 +1,52 @@
 const express = require('express');
 const http = require('http');
 const socketio = require('socket.io');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
-const cors = require('cors');
+const auth = require('./services/auth');
+const routes = require('./routes/routes');
 
 const app = express();
 const server = http.createServer(app);
 const sockets = socketio(server);
 
 
-const jwt = require('jsonwebtoken');
-
+// Express configs
 app.use(cors());
 app.use(express.json());
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
 app.use(cookieParser());
+// Routes
+app.use(routes);
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/views/login.html');
-});
-
-app.post('/login', (req, res) => { 
-  const { username, color } = req.body;
-
-  const token = jwt.sign(
-    { username, color},
-    "@QEGTUI",
-    { expiresIn: '1h' }
-  );
-  console.log(token);
-  
-  res.cookie('token', token);
-  res.status(200).redirect('/chat');
-});
-
-app.get('/chat', (req, res) => {
-  const token = req.cookies.token;
-  console.log('chat');
-  console.log(token);
-  if(token) {
-    res.sendFile(__dirname + '/views/chat.html')
-  } else {
-    res.redirect('/');
-  }
-})
 
 sockets.on('connection', (socket) => {
-  
-  // Send alert to server side when user connect and disconnect
-  socket.broadcast.emit('user connection', 'a user connected');
+  // Get token from socket handshake, "set on client-side"
+  let token = socket.handshake.auth.token;
+  // Get user info form token
+  let user = auth.getUserFromToken(token);
+
+  // Emit user to client side
+  socket.emit('user information', user);
+
+  // Send alert to client side when user connect and disconnect
+  socket.broadcast.emit('user connection', `${user.username} connected`, 'green');
   socket.on('disconnect', () => {
-    sockets.emit('user connection', 'a user disconnected');
+    sockets.emit('user connection', `${user.username} disconnected`, 'red');
   });
 
-  // socket.on('chat message', msg => {
-  //   console.log(`message: ${msg}`)
-  // });
+  // Recive a typing event, and send that to client side whith user data
+  socket.on('typing', (bool) => {
+    socket.broadcast.emit('typing', bool, user);
+  })
 
-  // Send the user message to server side
+  // Send the user message to client side
   socket.on('chat message', msg => {
-    sockets.emit('chat message', msg);
+    sockets.emit('chat message', msg, user);
   });
 });
 
+// Start server
 server.listen(3000, () => console.log('🔥 Server linstening on port:3000'));
