@@ -25,19 +25,26 @@ app.use(routes);
 sockets.on('connection', (socket) => {
   // Get token from socket handshake, "set on client-side"
   let token = socket.handshake.auth.token;
-
   // Get user info form token
   let user = auth.getUserFromToken(token);
 
-  // Send alert to server side when user connect and disconnect
-  socket.broadcast.emit('user connection', `${user.username} connected`);
+  // Emit user to client side
+  socket.emit('user information', user);
+
+  // Send alert to client side when user connect and disconnect
+  socket.broadcast.emit('user connection', `${user.username} connected`, 'green');
   socket.on('disconnect', () => {
-    sockets.emit('user connection', `${user.username} disconnected`);
+    sockets.emit('user connection', `${user.username} disconnected`, 'red');
   });
 
-  // Send the user message to server side
+  // Recive a typing event, and send that to client side whith user data
+  socket.on('typing', (bool) => {
+    socket.broadcast.emit('typing', bool, user);
+  })
+
+  // Send the user message to client side
   socket.on('chat message', msg => {
-    sockets.emit('chat message', msg);
+    sockets.emit('chat message', msg, user);
   });
 });
 
