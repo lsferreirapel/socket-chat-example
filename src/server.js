@@ -13,6 +13,7 @@ const sockets = socketio(server);
 
 
 // Express configs
+app.use(express.static('public'))
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -21,20 +22,34 @@ app.use(cookieParser());
 // Routes
 app.use(routes);
 
+let userList = [];
+
 
 sockets.on('connection', (socket) => {
   // Get token from socket handshake, "set on client-side"
   let token = socket.handshake.auth.token;
   // Get user info form token
   let user = auth.getUserFromToken(token);
+  // Save user on list
+  userList.push(user);
 
   // Emit user to client side
   socket.emit('user information', user);
+
+  // Emit online userlist to client-side
+  socket.emit('online users', userList);
+  console.log('ONLINE USERS:')
+  console.log(userList)
 
   // Send alert to client side when user connect and disconnect
   socket.broadcast.emit('user connection', `${user.username} connected`, 'green');
   socket.on('disconnect', () => {
     sockets.emit('user connection', `${user.username} disconnected`, 'red');
+    
+    userList = userList.filter(arrUser => arrUser !== user)
+    socket.emit('online users', userList);
+    console.log('ONLINE USERS:')
+    console.log(userList)
   });
 
   // Recive a typing event, and send that to client side whith user data
