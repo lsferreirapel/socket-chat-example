@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./normalize.css">
+  <link rel="stylesheet" href="./login.css">
+
+  <title>Real time chat - Login</title>
+</head>
+<body>
+  <form action="/login" method="POST" id="#login" class="login-form">
+    <label for="color" class="username-input-label">Enter your username:</label>
+    <input type="text" name="username" class="username-input" id="username" placeholder="Username" required>
+    <label for="color" class="color-input-label">Choose your color:</label>
+    <input type="color" name="color" class="color-input" id="color">
+    
+    <input type="submit" id="btn" class="submit-btn" value="Login">
+  </form>
+</body>
+</html>

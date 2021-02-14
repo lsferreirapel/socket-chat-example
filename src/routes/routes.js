@@ -3,7 +3,7 @@ const auth = require('../services/auth');
 
 // Default route, always send user to login page
 routes.get('/', (req, res) => {
-  res.sendFile('/views/login.html', { root: './src' });
+  res.render('login.html');
 });
 
 // Login page (Login.html) send a request to this route
@@ -30,7 +30,7 @@ routes.get('/chat', (req, res) => {
   // Validate token, if is valid send user to chat page
   //  else send user to login page
   if(auth.tokenIsValid(token)) {
-    res.sendFile('/views/chat.html', { root: './src' });
+    res.render('chat.html');
   } else {
     res.redirect('/');
   }
