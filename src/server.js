@@ -13,12 +13,16 @@ const sockets = socketio(server);
 
 
 // Express configs
-app.use(express.static('public'))
+app.use(express.static('public'));
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+app.set('views', './public');
+app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'html');
 // Routes
 app.use(routes);
 
@@ -38,18 +42,15 @@ sockets.on('connection', (socket) => {
 
   // Emit online userlist to client-side
   socket.emit('online users', userList);
-  console.log('ONLINE USERS:')
-  console.log(userList)
 
   // Send alert to client side when user connect and disconnect
-  socket.broadcast.emit('user connection', `${user.username} connected`, 'green');
+  socket.broadcast.emit('user connection', `${user.username} connected`, 'connect-message');
   socket.on('disconnect', () => {
-    sockets.emit('user connection', `${user.username} disconnected`, 'red');
+    sockets.emit('user connection', `${user.username} disconnected`, 'disconnect-message');
     
     userList = userList.filter(arrUser => arrUser !== user)
     socket.emit('online users', userList);
-    console.log('ONLINE USERS:')
-    console.log(userList)
+    
   });
 
   // Recive a typing event, and send that to client side whith user data

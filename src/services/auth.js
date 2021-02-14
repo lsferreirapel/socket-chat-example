@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const jwtLightenDarkenColor = require('./color');
 
 // Key used to encript the token
 const jwtSecret = "@QEGTUI"
@@ -33,7 +34,9 @@ module.exports = {
       
       const user = {
         username: jwtPayload.username,
-        color: jwtPayload.color
+        color: jwtPayload.color,
+        lightenColor: jwtLightenDarkenColor(jwtPayload.color, 150),
+        darkerColor: jwtLightenDarkenColor(jwtPayload.color, -70),
       }
       return user
 
