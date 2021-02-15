@@ -36,20 +36,24 @@ sockets.on('connection', (socket) => {
   let user = auth.getUserFromToken(token);
   // Save user on list
   userList.push(user);
+  auth.insetOnlineToken(token);
 
   // Emit user to client side
   socket.emit('user information', user);
 
   // Emit online userlist to client-side
   socket.emit('online users', userList);
+  socket.broadcast.emit('online users', userList);
 
   // Send alert to client side when user connect and disconnect
   socket.broadcast.emit('user connection', `${user.username} connected`, 'connect-message');
   socket.on('disconnect', () => {
     sockets.emit('user connection', `${user.username} disconnected`, 'disconnect-message');
     
-    userList = userList.filter(arrUser => arrUser !== user)
-    socket.emit('online users', userList);
+    userList = userList.filter(arrUser => arrUser !== user);
+    auth.deleteToken(token);
+
+    socket.broadcast.emit('online users', userList);
     
   });
 

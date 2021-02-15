@@ -4,16 +4,34 @@ const Color = require('color');
 // Key used to encript the token
 const jwtSecret = "@QEGTUI"
 
+// user list
+var tokenList = [];
+
 module.exports = {
 
   // Validate token, if is valid return true else return false
-  tokenIsValid(token) {
+  tokenIsValid(token) {    
+    console.log(tokenList);
     try {
       jwt.verify(token, jwtSecret);
       return true
     } catch (error) {
+      tokenList = tokenList.filter(item => item !== token);
       return false
     }
+  },
+
+  // If user is online return true, else return false
+  tokenIsOnline(token) {
+    if (tokenList.filter(item => item === token).length >= 1) {
+      return true;
+    } else {
+      return false
+    }
+  },
+
+  insetOnlineToken(token) { 
+    tokenList.push(token);
   },
   
   // Create a new token, valid for 3 hours
@@ -25,6 +43,11 @@ module.exports = {
     );
 
     return token;
+  },
+
+  // Delete token
+  deleteToken(token) {
+    tokenList = tokenList.filter(item => item !== token);
   },
 
   // If token is valid, get username and color from token

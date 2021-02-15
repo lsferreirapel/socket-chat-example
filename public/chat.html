@@ -65,6 +65,8 @@
     });
     
     socket.on('online users', usersList => {
+      console.log(usersList);
+      
       usersList.forEach(user => {
         let item = document.createElement('li');
         item.textContent = user.username;
