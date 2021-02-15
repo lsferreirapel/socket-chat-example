@@ -65,7 +65,8 @@
     });
     
     socket.on('online users', usersList => {
-      
+      htmlUsersList.querySelectorAll('li').forEach(item => item.remove());
+
       usersList.forEach(user => {
         let item = document.createElement('li');
         item.textContent = user.username;
