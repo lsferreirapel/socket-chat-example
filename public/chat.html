@@ -65,7 +65,6 @@
     });
     
     socket.on('online users', usersList => {
-      console.log(usersList);
       
       usersList.forEach(user => {
         let item = document.createElement('li');
@@ -95,9 +94,6 @@
 
 
     socket.on('chat message', (msg, user) => {
-      
-      console.log('clara', user.lightenColor);
-      console.log('escura', user.darkerColor);
 
       const item = document.createElement('li');
       const label = document.createElement('strong');

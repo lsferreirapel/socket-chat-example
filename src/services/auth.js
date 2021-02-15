@@ -11,7 +11,6 @@ module.exports = {
 
   // Validate token, if is valid return true else return false
   tokenIsValid(token) {    
-    console.log(tokenList);
     try {
       jwt.verify(token, jwtSecret);
       return true
