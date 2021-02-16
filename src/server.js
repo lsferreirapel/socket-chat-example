@@ -1,16 +1,18 @@
 const express = require('express');
 const http = require('http');
-const socketio = require('socket.io');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
-const auth = require('./services/auth');
+
+// Services and routes
+const socketio = require('./services/socketio');
 const routes = require('./routes/routes');
 
 const app = express();
 const server = http.createServer(app);
-const sockets = socketio(server);
 
+// Start socketio
+socketio(server);
 
 // Express configs
 app.use(express.static('public'));
@@ -23,50 +25,9 @@ app.use(cookieParser());
 app.set('views', './public');
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
+
 // Routes
 app.use(routes);
-
-let userList = [];
-
-
-sockets.on('connection', (socket) => {
-  // Get token from socket handshake, "set on client-side"
-  let token = socket.handshake.auth.token;
-  // Get user info form token
-  let user = auth.getUserFromToken(token);
-  // Save user on list
-  userList.push(user);
-  auth.insetOnlineToken(token);
-
-  // Emit user to client side
-  socket.emit('user information', user);
-
-  // Emit online userlist to client-side
-  socket.emit('online users', userList);
-  socket.broadcast.emit('online users', userList);
-
-  // Send alert to client side when user connect and disconnect
-  socket.broadcast.emit('user connection', `${user.username} connected`, 'connect-message');
-  socket.on('disconnect', () => {
-    sockets.emit('user connection', `${user.username} disconnected`, 'disconnect-message');
-    
-    userList = userList.filter(arrUser => arrUser !== user);
-    auth.deleteToken(token);
-
-    socket.broadcast.emit('online users', userList);
-    
-  });
-
-  // Recive a typing event, and send that to client side whith user data
-  socket.on('typing', (bool) => {
-    socket.broadcast.emit('typing', bool, user);
-  })
-
-  // Send the user message to client side
-  socket.on('chat message', msg => {
-    sockets.emit('chat message', msg, user);
-  });
-});
 
 // Start server
 server.listen(3000, () => console.log('🔥 Server linstening on port:3000'));
