@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./normalize.css">
-    <link rel="stylesheet" href="./chat.css">
+    <link rel="stylesheet" href="./styles/normalize.css">
+    <link rel="stylesheet" href="./styles/chat.css">
     <title>Real time chat</title>
   </head>
   <body>
@@ -24,130 +24,26 @@
         </div>
       </section>
       
-      <section class="info-side-bar">
-        
-        <div class="user-color" id="user-color"></div>
-        <h2 class="user-name" id="username"></h2>
-        <ul class="online-users-list" id="userslist">
-          <li class="online-user"></li>
-        </ul>
+      <section class="info">
+
+        <form action="/logout" method="get" class="logout">
+          <button type="submit" class="exit-btn">LOGOUT</button>
+        </form>
+       
+  
+        <section class="info-side-bar">
+          <div class="user-color" id="user-color"></div>
+          <h2 class="user-name" id="username"></h2>
+          <ul class="online-users-list" id="userslist">
+            <li class="online-user"></li>
+          </ul>
+        </section>
+
       </section>
+
     </main>
-
-
-
-
-
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io({
-      auth: {
-        token: document.cookie?.split('; ')[0]?.slice(6)
-      }
-    });
-
-    const span = document.getElementById('typing-label');
-    const messages = document.getElementById('messages');
-    const form = document.getElementById('form');
-    const input = document.getElementById('input');
     
-    const usernameInfo = document.getElementById('username');
-    const userColorInfo = document.getElementById('user-color');
-    const htmlUsersList = document.getElementById('userslist');
-    
-
-    let user;
-
-    socket.on('user information', userInfo => {
-      usernameInfo.textContent = userInfo.username;
-      userColorInfo.style.background = userInfo.color;
-    });
-    
-    socket.on('online users', usersList => {
-      usersList.forEach(user => {
-        let item = document.createElement('li');
-        item.textContent = user.username;
-        item.style.color = user.color;
-
-        htmlUsersList.appendChild(item);
-      });
-    })
-
-    socket.on('user connection', (alert, className) => {
-      let item = document.createElement('li');
-      item.textContent = alert;
-      item.classList.add(className);
-      messages.appendChild(item);
-      messages.scrollTop = messages.scrollHeight;
-    })
-
-    socket.on('typing', (bool, user) => {
-      if (bool) {
-
-        span.textContent = `${user.username} is typing...`;
-      } else {
-        span.textContent = '';
-      }
-    })
-
-
-    socket.on('chat message', (msg, user) => {
-      
-      console.log('clara', user.lightenColor);
-      console.log('escura', user.darkerColor);
-
-      const item = document.createElement('li');
-      const label = document.createElement('strong');
-
-
-      label.textContent = user.username;
-      label.style.color = user.darkerColor;
-      label.classList.add('message-label-name');
-      
-      item.classList.add('message');
-      item.style.borderColor = user.darkerColor;
-      item.style.background = user.lightenColor;
-      item.textContent = `${msg}`;
-      item.insertBefore(label, item.firstChild);
-      messages.appendChild(item);
-      messages.scrollTop = messages.scrollHeight;
-    });
-
-
-    let typeInterval;
-    let typing = false;
-    input.addEventListener('keydown', e => {
-      if (e.key !== 'Enter') {
-        clearInterval(typeInterval);
-        if (!typing) {
-          typing = true;
-          socket.emit('typing', typing);
-        } 
-        typeInterval = setTimeout(() => {
-          typing = false;
-          socket.emit('typing', typing);
-        }, 2000);
-      }
-    });
-
-    form.addEventListener('submit', e => { 
-      e.preventDefault();
-      
-      if (typing) {
-        clearInterval(typeInterval);
-        typing = false;
-        socket.emit('typing', typing);
-      }
-
-      if (input.value) {
-        socket.emit('chat message', input.value);
-        input.value = '';
-      }
-    });
-
-    
-
-  </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./js/chat.js"></script>
   </body>
 </html>

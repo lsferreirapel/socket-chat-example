@@ -3,7 +3,18 @@ const auth = require('../services/auth');
 
 // Default route, always send user to login page
 routes.get('/', (req, res) => {
-  res.render('login.html');
+  let token = req.cookies.token;
+
+  if (token && auth.tokenIsValid(token) && !auth.tokenIsOnline(token)) {
+    // Send user to chat page
+    res.status(200).redirect('/chat');
+  } else {
+    if  (auth.tokenIsOnline(token)) {
+      res.send('User is already logged in!')
+    } else {
+      res.render('login.html');
+    }
+  }
 });
 
 // Login page (Login.html) send a request to this route
@@ -22,14 +33,19 @@ routes.post('/login', (req, res) => {
   res.status(200).redirect('/chat');
 });
 
+routes.get('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.status(200).redirect('/');
+})
+
 // Chat route
 routes.get('/chat', (req, res) => {
   // Get token from cookies
   const token = req.cookies.token;
   
-  // Validate token, if is valid send user to chat page
+  // Validate token, if is valid and isn't online send user to chat page
   //  else send user to login page
-  if(auth.tokenIsValid(token)) {
+  if(auth.tokenIsValid(token) && !auth.tokenIsOnline(token)) {
     res.render('chat.html');
   } else {
     res.redirect('/');
