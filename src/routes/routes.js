@@ -33,6 +33,11 @@ routes.post('/login', (req, res) => {
   res.status(200).redirect('/chat');
 });
 
+routes.get('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.status(200).redirect('/');
+})
+
 // Chat route
 routes.get('/chat', (req, res) => {
   // Get token from cookies
